@@ -12,10 +12,12 @@ XJ = []
 sum = 0
 samples = []
 
+
 def calculate_N():
     N = len(samples) / RECORD_SECONDS
     print("N : %s"%N)
     return N
+
 
 def fourie_transform(samples):
     N = calculate_N()
@@ -25,28 +27,16 @@ def fourie_transform(samples):
         for n in range(len(x)):
             sum += x[n]*(np.exp(-1j* freq* N *n))
         XJ.append(sum)
-    print(XJ)
-    print(XJ.index(max(XJ)))
-    print(XJ.index(XJ[len(XJ)-2]))
-    print("///////////////////////")
+
 
     output = []
     for data in XJ :
         output.append(math.sqrt((data.real**2)+(data.imag**2)))
-    print(output)
-    print(output.index(max(output)))
-    print(output.index(output[len(output)-2]))
-    # print("///////////////////////")
-    # output = sorted(XJ, key=float)
-
-    # print(output[len(output)-1])
-    # print(max(output))
-    # print(output[len(output)-2])
-
-
-
-
-
+    print("KHHHH")
+    # print(output)
+    print(sorted(output))
+    
+        
 
 def convert_data(frames):
     number_of_data = 0  
@@ -55,10 +45,13 @@ def convert_data(frames):
     print("********************")
     for data in frames:
         audio_data = np.fromstring(data, np.int16)
-        # print(audio_data)
         for each in audio_data:
             samples.append(each)
-    # print(samples)
+    
+    x = np.arange(0,len(samples)*0.01,0.01)
+    z = np.array(samples)
+    plt.plot(x,z)
+    plt.show()
     fourie_transform(samples)
 
 
@@ -66,7 +59,7 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
-RECORD_SECONDS = 0.5
+RECORD_SECONDS = 3
 WAVE_OUTPUT_FILENAME = "output.wav"
 
 p = pyaudio.PyAudio()
@@ -77,11 +70,12 @@ stream = p.open(format=FORMAT,
                 input=True,
                 frames_per_buffer=CHUNK)
 
-print("* recording")
+
 
 frames = []
-
+print("* recording")
 for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+    
     data = stream.read(CHUNK)
     frames.append(data)
 
@@ -90,7 +84,21 @@ print("* done recording")
 convert_data(frames)
 
 # dfft = 10.*np.log10(abs(np.fft.rfft(audio_data)))
-# print(dfft)
+
+# keep_going = True
+# while keep_going:
+    
+#     try:
+#         for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+#             data = stream.read(CHUNK)
+#             frames.append(data)
+        
+#         convert_data(frames)
+        
+#     except KeyboardInterrupt:
+#         keep_going=False
+#     except:
+#         pass
 
 stream.stop_stream()
 stream.close()
@@ -101,4 +109,7 @@ wf.setnchannels(CHANNELS)
 wf.setsampwidth(p.get_sample_size(FORMAT))
 wf.setframerate(RATE)
 wf.writeframes(b''.join(frames))
+
+
+
 wf.close()
